@@ -1,3 +1,33 @@
+
+PUT _cluster/settings
+{
+ "persistent": {
+ "cluster.routing.allocation.enable": "none",
+ "cluster.routing.rebalance.enable": "none",
+ "cluster.routing.allocation.allow_rebalance": "indices_primaries_active"
+ }
+}
+POST _flush/synced
+
+sudo systemctl stop elasticsearch.service
+
+PUT _cluster/settings
+{
+ "persistent": {
+ "cluster.routing.allocation.enable": "primaries",
+ "cluster.routing.rebalance.enable": "primaries",
+ "cluster.routing.allocation.allow_rebalance": "indices_primaries_active"
+ }
+}
+PUT _cluster/settings
+{
+ "persistent": {
+ "cluster.routing.rebalance.enable": "all",
+ "cluster.routing.allocation.enable": "all",
+ "cluster.routing.allocation.allow_rebalance": "indices_all_active"
+ }
+}
+
 # ElasticSearch
 
 启动：

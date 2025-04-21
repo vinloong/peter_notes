@@ -2375,6 +2375,25 @@ Or as suggested by a user in IRC. This one seems to work the best.
 curl -XPOST 'http://localhost:9200/_cache/clear' -d '{ "fielddata": "true" }'
 
 
+132. k8s 删除pod
+# 删除所有命名空间中 Evicted 状态的 Pod
+kubectl get pods --all-namespaces -o json | \
+  jq '.items[] | select(.status.reason!=null) | select(.status.reason | contains("Evicted")) | "\(.metadata.namespace) \(.metadata.name)"' | \
+  xargs -n2 bash -c 'kubectl delete pod -n $0 $1'
+
+# 删除所有命名空间中 Failed/Completed 状态的 Pod
+kubectl delete pods --all-namespaces --field-selector=status.phase==Failed
+kubectl delete pods --all-namespaces --field-selector=status.phase==Succeeded
+
+调整节点 max-pods 限制​
+# 编辑 kubelet 配置文件（通常位于 /etc/kubernetes/kubelet.conf）
+sudo vi /etc/kubernetes/kubelet.conf
+# 添加或修改以下参数
+--max-pods=200  # 根据节点容量调整
+sudo systemctl restart kubelet
+
+root@anxin-m1:/home/anxin# kubectl describe pod -niota iota-dac | grep 'registry.ngaiot.com/iot/iot-dac'
+
 ##### Wbo@hi1I
 ##### 1mDN3#DSz$
 ##### 349 095 503 sm4d26
