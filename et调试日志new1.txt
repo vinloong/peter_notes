@@ -2212,6 +2212,7 @@ find . -maxdepth 1 -type f -name "*.csv" -delete
 :%s/wvp:32188/10.8.40.124:32188/g
 :%s/10.8.40.124:18080/10.8.40.124:32188/g
 :%s/192.168.1.133/192.168.0.133/g
+:%s/https:/http:/g
  kubectl cp -niot /home/cloud/zlmconfig.ini zlm-8dd665c6b-jz7mr:/conf/config.ini
 222.186.227.196
 投：172.30.16.121
@@ -2399,4 +2400,27 @@ root@anxin-m1:/home/anxin# kubectl describe pod -niota iota-dac | grep 'registry
 ##### 349 095 503 sm4d26
 ##### AT_fwQV5TNeDOiaPvJRUwsC2fcEzfzUiPi1
 
+133. 启动AirByte
+10.8.30.143 （从ck-master搬迁过来）
+nohup ./run-ab-platform.sh &
+或者
+./run-ab-platform.sh -b
+运行后只有本地 localhost:8000可访问，解决办法：在nginx中转发
 
+
+134. PG 223 IP飘逸
+repmgr -f /opt/repmgr.conf cluster show
+systemctl status keepalived 
+
+ snap set docker daemon='{
+  "registry-mirrors": ["https://docker.m.daocloud.io",
+    "https://dockerproxy.com",
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://docker.nju.edu.cn",
+    "https://registry.docker-cn.com",
+    "https://hub-mirror.c.163.com",
+    "https://mirror.baidubce.com",
+    "https://docker.mirrors.ustc.edu.cn"]
+}'
+
+snap restart docker
