@@ -1,3 +1,1166 @@
+在事件发生前，涉事数据库主要采取了以下几项基础安全措施：
+1. 数据库监听的非标准端口 19200，意图避免默认端口被轻易扫描，但此类“安全通过模糊”的措施效果有限。
+2. 通过 Nginx 做反向代理，设置了基础的 IP 白名单控制（限制访问源 IP），但由于配置疏漏，未覆盖所有接口路径，导致部分接口仍然可以从公网访问。
+3. 服务器对外网提供了基础的防火墙硬件隔离，但是19200处理开放状态造成本次泄漏。
+4. 最早ES作为日志数据库不包含敏感信息，所有的用户都有读写权限，但后续业务发展添加了这部分业务库，未能即时审计，未即时加以隔离保护。
+
+
+/artemis/api/resource/v2/encodeDevice/search  indexCode   [GA序号 deviceCode]
+                                                |
+                                                |
+                                                |
+/artemis/api/resource/v1/cameras  encodeDevIndexCode   [cameraIndexCode]
+
+7.23生产力工具
+AI助力生产力工具的提升，工具是人类文明最大的贡献者。工具的提升》文明的提升，ai或许还不能代替人类思考，帮助人类实现思考链上信息收集和对比的重要一环。
+思考》搜集信息》对比知识》做出决策。关注于决策。类如：点外卖agent：今天想吃啥，AI分析过往记录（习惯、最近记录、预测倾向）--》预测能力，找寻规律。
+万事万物均有规律中找寻
+
+01030200B3F9F1
+提取一个安心云方面的专利
+按课题的那种  创新研究**技术、解决***问题  达到***效果
+
+
+研发了多物理量的桥梁结构实时轻量化智能监测系统，集成数据清洗和压缩感知技术、边缘-云端协同计算技术，构建了覆盖感知-算法-平台全链条的智能监测体系（见图4-8）。解决了传统桥梁健康状态监测中施工复杂、数据信噪比低、人工依赖度高和长期稳定性差等问题。为工程监测提供了轻量化、智能化的长期在线监测与预警方案，降低了25%的桥梁运维成本。
+
+
+
+轻量化，平台+边缘联动采集、控制系统，传感器属性、能力物模型抽象，支持多物理量同步采集和融合感知。
+高并发的轻量化采集，脚本化的协议解析能力支持快速定制开发，支持采集能力下层边缘，实现边缘采集分析过滤。自研数据过滤系统，支持多种滑窗过滤算法，解决了采集过程的异常数据， 
+
+继续挖掘。。。
+
+
+基于桥梁结构特性构建传感器能力与属性的统一物模型，支持应变、振动、位移、倾角、风速、温湿度等多维数据的同步采集与融合感知。并采用轻量化高并发采集架构，边缘端设备脚本化协议解析机制，快速适配多种工业协议，实现高并发、多通道数据采集与接入，极大提升采集效率与适配速度。另外集成自研的数据清洗与滑窗过滤算法模块，支持中值滤波、极值剔除、标准差滑窗判断等算法，有效排除异常采样点。系统通过策略驱动实现采集→边缘预处理→压缩感知→云端建模分析→平台可视化预警的全过程闭环，支持平台统一策略下发与模型迭代。解决传统桥梁监测系统解决原始数据中噪声高、冗余大、人工清洗负担重的痛点，以及云端全量上传导致的数据延迟高、带宽压力大问题；并解决了多协议设备接入困难、开发周期长、运维成本高的问题。实现桥梁结构状态轻量化、低功耗、多物理量融合感知的长期在线监测
+
+
+后端开发想做一个前端界面，react的，接口后端我自己写，有下面这些：
+
+查询PG数据库 - 设备基础信息、绑定配置、有无滑窗过滤
+查询REDIS数据 - 缓存数据是否正常
+查询Prometheus以及DacProxy - 监测设备连接
+查询ES的日志 - 设备日志
+查询ES的数据 - 最新数据、相关（设备。主题。告警数据） 展示数据》
+查询Kafka的数据 - 新旧集群2个kafka，有无对应的记录。
+
+界面中，我需要：
+1、有登录界面。 且支持本机下次自动登录
+2、搜索结构物（用户输入文字，点击搜索，后端接口搜。支持拼音）
+3、结构物选择后，显示表格设备清单。支持筛选搜索。
+4、分别调用上述查询接口，在页面中展示对应结果：消息列表、图形等。每个查询是异步的，先查到的先返回。其他等待
+
+界面要美观。
+
+
+            if prop.get("options"):
+                content += f"<p><b>可选项：</b>{', '.join(list(map(str, prop['options'])))}</p>"
+
+TypeError: sequence item 0: expected str instance, dict found
+
+
+滑坡：当前图像内容为摄像头监测画面,判断图像中是否存在滑坡现象。
+当前图像内容为摄像头监测画面,判断图像中是否存在坍塌现象。检测桥梁结构整体或局部坍塌事件,包括但不限于桥面断裂、桥墩台沉降、桥体错位、桥板断裂等典型破坏特征.
+
+
+修改下面方法：
+1. 除了返回字节数组，同时下载文件到本地（指定按照日期目录）,文件名通过传入的CameraNo+时间到毫秒+ext后缀
+2. 另外启动清理携程。定期清理三个月之前的文件夹
+
+func DownloadImage(imageURL string) ([]byte, error) {
+	// 创建HTTP客户端
+	client := &http.Client{
+		Timeout: 15 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true, // 跳过证书验证
+			},
+		},
+	}
+	resp, err := client.Get(imageURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	imageBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return imageBytes, nil
+}
+
+识别程序更新了，目前可以用域名访问 https://ai-camera.ngaiot.com/
+另外修改了
+1. 图片存储到本地用域名访问
+2. 改用轻量级的小模型（保留每隔1小时用max模型识别一次）
+
+
+
+1、 2.0关系数据库，id int 21亿。 （历史，长期稳定性考虑不足。 放大数据字段类型，梳理在维护2.0项目，协同处理。 新版本分布式存储，固定分片方式不存在该问题，项目前期做好数据量核算）
+
+3、传输积压问题 - idau.tool性能缺陷。 有优化替代品，直接应用。
+
+
+2、振动DAAS采集 - 产品化的版本不太适用。这个在当前基础上做项目使用的版本（关闭多余功能、文件存储、刷新率降低）。 轻量化版本规划在做，。
+
+
+软件-袁凤华
+1. 未识别到的告警是否可以不发 alarmType:"none"
+2. 摄像头LLM识别配置管理（http://222.186.227.196:32145/）要添加个搜索功能
+3. 在一体化二参告警测试中（Lora控制盒）现场测试没通过，主要问题为：数据长度不匹配，传输距离限制
+
+方案-王泽林
+
+王瑀轩
+
+摄像头LLM识别配置管理搜索功能 - 殷伟文（暂时不处理）
+区域识别提升精度 - 殷伟文 （后续优化7-25）
+RTU触发平台识别 - 殷伟文 （后续优化7-31）
+识别功能缺陷方案部传递 - @王泽林
+工控机基础环境搭建完成 - 今日下班前 @王瑀轩
+软硬件现场联调人员安排 - @刘歆毅 @黄莉
+
+
+
+
+airbyte用docker-compose启动报错：airbyte-temporal组件
+[Fx] INVOKE             go.temporal.io/server/service/history.ServiceLifetimeHooks()
+{"level":"fatal","ts":"2025-07-10T08:44:37.639Z","msg":"ListenIP failed, unable to parse bindOnIP value","address":"10.8.30.143 192.168.1.100","logging-call-at":"rpc.go:228","stacktrace":"go.temporal.io/server/common/log.(*zapLogger).Fatal\n\t/temporal/common/log/zap_logger.go:150\ngo.temporal.io/server/common/rpc.getListenIP\n\t/temporal/common/rpc/rpc.go:228\ngo.temporal.io/server/common/rpc.(*RPCFactory).GetRingpopChannel\n\t/temporal/common/rpc/rpc.go:156\ngo.temporal.io/server/temporal.(*Server).newBootstrapParams.func1\n\t/temporal/temporal/server.go:365\ngo.temporal.io/server/common/resource.MembershipFactoryProvider\n\t/temporal/common/resource/fx.go:266\nreflect.Value.call\n\t/usr/local/go/src/reflect/value.go:543\nreflect.Value.Call\n\t/usr/local/go/src/reflect/value.go:339\ngo.uber.org/dig.defaultInvoker\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/dig.go:439\ngo.uber.org/dig.(*node).Call\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/dig.go:912\ngo.uber.org/dig.paramSingle.Build\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/param.go:240\ngo.uber.org/dig.paramList.BuildList\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/param.go:196\ngo.uber.org/dig.(*node).Call\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/dig.go:903\ngo.uber.org/dig.paramSingle.Build\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/param.go:240\ngo.uber.org/dig.paramList.BuildList\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/param.go:196\ngo.uber.org/dig.(*node).Call\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/dig.go:903\ngo.uber.org/dig.paramSingle.Build\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/param.go:240\ngo.uber.org/dig.paramList.BuildList\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/param.go:196\ngo.uber.org/dig.(*node).Call\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/dig.go:903\ngo.uber.org/dig.paramSingle.Build\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/param.go:240\ngo.uber.org/dig.paramList.BuildList\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/param.go:196\ngo.uber.org/dig.(*Container).Invoke\n\t/go/pkg/mod/go.uber.org/dig@v1.13.0/dig.go:587\ngo.uber.org/fx.(*App).executeInvoke\n\t/go/pkg/mod/go.uber.org/fx@v1.14.2/app.go:873\ngo.uber.org/fx.(*App).executeInvokes\n\t/go/pkg/mod/go.uber.org/fx@v1.14.2/app.go:846\ngo.uber.org/fx.New\n\t/go/pkg/mod/go.uber.org/fx@v1.14.2/app.go:594\ngo.temporal.io/server/temporal.(*Server).Start\n\t/temporal/temporal/server.go:228\nmain.buildCLI.func2\n\t/temporal/cmd/server/main.go:168\ngithub.com/urfave/cli/v2.(*Command).Run\n\t/go/pkg/mod/github.com/urfave/cli/v2@v2.3.0/command.go:163\ngithub.com/urfave/cli/v2.(*App).RunContext\n\t/go/pkg/mod/github.com/urfave/cli/v2@v2.3.0/app.go:313\ngithub.com/urfave/cli/v2.(*App).Run\n\t/go/pkg/mod/github.com/urfave/cli/v2@v2.3.0/app.go:224\nmain.main\n\t/temporal/cmd/server/main.go:50\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:255"}
+
+
+
+A4-0C-66-1C-OF-B4
+a4:0c:66:1c:of:b4
+
+      - DB=postgresql
+      - DB_PORT=5432
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
+      - LOG_LEVEL=${LOG_LEVEL}
+      - POSTGRES_PWD=postgres
+      - POSTGRES_SEEDS=pg-210
+      - POSTGRES_USER=postgres
+
+
+docker run --rm \
+  --name airbyte-temporal2 \
+  -e DB=postgresql \
+  -e DB_PORT=5432 \
+  -e DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml \
+  -e LOG_LEVEL=INFO \
+  -e POSTGRES_PWD=postgres \
+  -e POSTGRES_SEEDS=10.8.30.182 \
+  -e POSTGRES_USER=postgres \
+  airbyte/temporal:0.50.4
+
+
+
+record parse error: {"notificationType":"voice","receiver":[{"name":"wangjiahui","phone":"13776310625"}],"content":{"title":"","body":"动态采集FS-V08（测试部刘纯）于2025-07-10 23:19触发3级告警，请登录平台及时处理。"},"time":"2025-07-10T23:19:51.586+0800","category":"alarm"}
+
+to: voice receivers:[name:wangjiahui phone:13776310625] title: content:分布式数据采集节点wjh于2025-07-10 23:10触发2级告警，请登录平台及时处理。
+
+
+{
+    "userId": "ce2d7eb2-e56e-422e-8bbe-95dfa18e32f8",
+    "thingId": "effc73fb-b5be-4e98-a270-0f50f497f83f",
+    "dimensionId": "1fbcd5fc-2347-493f-92a4-a1d3fd3252e4",
+    "dimCapId": "23677a83-cb29-4a95-8f95-985c823cd5bb",
+    "capId": "acb3b28c-aafa-4c55-8989-5fbac75a4d15",
+    "deviceId": "b96e0445-729b-4285-b95f-a32f05566dc3",
+    "scheduleId": "57e96cf5-2863-49de-9c3e-9dd2f80c2d21",
+    "taskId": "36c31449-cd42-4258-bc6c-5b83d91434de",
+    "jobId": 1,
+    "jobRepeatId": 1,
+    "triggerTime": "2025-07-10T23:35:00+08:00",
+    "realTime": "0001-01-01T00:00:00Z",
+    "finishTime": "2025-07-10T23:35:43.929163476+08:00",
+    "seq": 0,
+    "released": false,
+    "data": {
+        "type": 1,
+        "data": {
+            "humidity": 52.71,
+            "temp": 31.45
+        },
+        "result": {
+            "code": 0,
+            "msg": "",
+            "detail": null,
+            "errTimes": 0,
+            "dropped": false
+        }
+    }
+}
+
+
+{
+    "model": "recalc",
+    "stationId": [
+        121558,121562,121535,121575,121563,121568,121559,121570,121577,121578,121567,121580,121571,121566,121536,121561,121547,121564,121548,121549,121565,121576,121550,121569,121581,121572,121579,121573,121574,121582,122002,122064,122075,121999,122042,122043,122039,122045,122061,122003,121998,122001,122011,122070,122009,122063,122000,122010,122056,122012,122021,122066,122013,122014,122031,122018,122015,122052,122017,122054,122060,122068,122016,122062,122065,122019,122020,122023,122022,122038,122024,122057,122072,122025,122026,122048,122027,122028,122030,122032,122029,122051,122049,122055,122067,122033,122069,122044,122046,122041,122050,122053,122034,122036,122059,122037,122058,122071,122047,122073,122074,122035,122040
+    ],
+    "msgId": "b602cdde-d8cd-4fdc-a9db-dd32b809bd66",
+    "dataBeginTime": "2025-05-14T00:00:14.000Z",
+    "dataEndTime": "2025-06-08T16:00:14.000Z",
+    "operation": "add"
+}
+
+mqtt.datahub.anxinyun.cn
+
+$up/20230710
+  � �	!$ \{"ID":"20230710","AT":"2025-07-08 09:33:34","VER":"V1.052","IAP":2,"ERR":0,"CV":12,"SAVE":0}��END
+
+
+[device_monitor]10:57:16 SELECT 1 FROM "public"."device_monitor" WHERE "collector_id"='' AND "collector_time"='';
+[device_monitor]10:57:16 UPDATE "public"."device_monitor" SET "collector_time" = , "data" = null WHERE "collector_id" = ;
+[device_monitor]10:57:17 mqtt body:{systemNum=S1_G1_GT10054_PV:yuxinxincailiao, value=0.24000000953674317, time=1751514693383}
+[device_monitor]10:57:17 SELECT 1 FROM "public"."device_monitor" WHERE "collector_id"='' AND "collector_time"='';
+[device_monitor]10:57:17 UPDATE "public"."device_monitor" SET "collector_time" = , "data" = null WHERE "collector_id" = ;
+[device_monitor]10:57:17 mqtt body:{systemNum=QT481-9:zhongxinhuagong, value=0.0, time=1751511361110}
+[device_monitor]10:57:17 SELECT 1 FROM "public"."device_monitor" WHERE "collector_id"='' AND "collector_time"='';
+[device_monitor]10:57:18 UPDATE "public"."device_monitor" SET "collector_time" = , "data" = null WHERE "collector_id" = ;
+[device_monitor]10:57:18 mqtt body:{systemNum=TI103B:lichangrongxincailiao, value=0.0, time=1751511321126}
+[device_monitor]10:57:18 SELECT 1 FROM "public"."device_monitor" WHERE "collector_id"='' AND "collector_time"='';
+[device_monitor]10:57:18 UPDATE "public"."device_monitor" SET "collector_time" = , "data" = null WHERE "collector_id" = ;
+
+ubuntu/root
+
+golang实现一个设备接收和解析工具：
+通过UDP通信，需要配置一个端口以及设备的IP和端口。
+
+实现：
+查询版本号
+查询序列号
+ 查询主机硬件参数
+ 查询主机扫描参数
+ 
+ 并通过golang web-templagte显示参数信息以及数据。
+ 
+ 
+ FBG光纤光栅采集仪中：波长模式、调试模式
+
+topic: ai/alarm/FQ6615540
+
+payload: {"deviceId":"FQ6615540","alarmTime":1751334422,"alarmType":"landslide","photoPath":"M123145/20250701/202507011009001.jpg"}
+
+
+
+
+modbus-rtu系数拟合何如应用
+其他标准协议匹配（环保、RTU等）
+协议识别自动化Agent实现解析代码部署
+协议自动化生成解析代码并验证执行流水线
+
+
+base64.StdEncoding.EncodeToString(imageBytes)
+golang实现功能上传图片：
+
+8.2获取API接口认证信息
+8.2.1请求地址
+/authorize
+8.2.2请求方式
+POST
+8.2.3请求头
+ContentType:application/json;charset=utf-8
+8.2.4请求体
+{
+"username":"warning",
+"password":"RjJmZjArRndkYXlmYUJDcU9kNmR6QT09"
+}
+8.2.5响应体
+  - StatusCode=200:  OK   响应数据格式: json
+{
+"status":200,
+"result":{
+"token":"string", //请求认证字符串
+"expire":7200 //认证字符串过期时间
+}
+}
+  - StatusCode=400：Bad Request  响应数据格式：json
+{
+"show": true,
+"msgCn": "",//错误描述
+"time": "2019-06-0416:36:43",//请求响应时间
+"error": "BAD_REQUEST",// 错误名称
+"msgEn": "Failed",//错误描述
+"status": 400//请求响应码
+}
+
+8.3上传灾害照片
+8.3.1传输条件
+发生灾害报警时，上报灾害报警照片。
+8.3.2请求方式
+POST
+8.3.3请求地址
+/upload/photo
+8.3.4请求头
+ContentType:multipart/form-data;charset=utf-8
+8.3.5参数说明
+字段
+类型
+非空
+字段含义
+file
+file
+是
+照片文件流（文件名即2.4的照片名称）
+path
+
+string
+是
+相对路径，
+格式“{网关ID}/yyyy”
+
+8.3.6 HttpResponse
+StatusCode
+说明
+200
+正常上传
+401
+无效令牌
+400
+请求参数不正确
+500
+异常
+
+
+golang windows程序监控服务开发。
+用web-template实现前端界面，可以实现：
+1. 前端界面查询所有进程是否启动、启动时间
+2. 可增删改启动任务ProcessInfo。 （其中path可以通过选中本地文件的方式从对话框选中）
+3. 可进入维护状态，暂时关闭进程检查。但是维护状态只能保持一段时间（比如10分钟，然后自动恢复成监控状态）
+
+func StartNewCheck() {
+	imageMap := GetProcess()
+	for _, pInfo := range conf.ProcessInfo {
+		pName := pInfo.Name
+		pPath := pInfo.Path
+		delay := pInfo.Delay
+		pIdArr, isExist := imageMap[pName]
+		if isExist {
+			logger.Info("[%s]正在运行", pName)
+			if len(pIdArr) > 1 {
+				logger.Info("[%s]有多个实例运行，需关闭", pName)
+				for _, pId := range pIdArr {
+					logger.Info("[%s]准备关闭[%d]", pName, pId)
+					kErr := killProcess(pId)
+					if kErr != nil {
+						logger.Error("[%s]关闭[%d]失败,err=%v", pName, pId, kErr)
+					}
+				}
+			}
+		} else {
+			logger.Info("[%s]未运行", pName)
+			SendEmail(fmt.Sprintf("[%s]未运行\n", pName))
+			command := exec.Command("cmd", "/C", pPath)
+			runErr := command.Run()
+			if runErr != nil {
+				logger.Error("[%s]启动失败,err=%v", pName, runErr)
+			} else {
+				time.Sleep(time.Duration(delay) * time.Second)
+			}
+		}
+	}
+}
+
+func GetConfig() *entity.StartConfig {
+	var config entity.StartConfig
+	if yamlFile, err := ioutil.ReadFile("conf.yaml"); err != nil {
+		logger.Error("读取conf.yaml文件失败，err=%v", err)
+	} else {
+		err = yaml.Unmarshal(yamlFile, &config)
+		if err != nil {
+			logger.Error("转换yamlFile失败，err=%v", err)
+		} else {
+			logger.Info("读取配置成功")
+		}
+	}
+	return &config
+}
+
+type StartConfig struct {
+	ProcessInfo []PInfo    `yaml:"PInfos"`
+	TickerTime  int        `yaml:"Ticker"`
+}
+
+type PInfo struct {
+	Name  string `yaml:"Name"`
+	Path  string `yaml:"Path"`
+	Delay int    `yaml:"Delay"`
+}
+
+
+
+
+2475702f32323530343731310a000100018006001007e9061a173a3b01005b7b224944223a223232353034373131222c224154223a22323032352d30362d3
+2362
+032333a35383a3537222c22564552223a2256312e303431222c22494150223a322c22455252223a302c224356223a362c2253415645223a307db3bf454e44
+
+2464772f32323530343731310100010001000007e9061a173a000100747b224154223a22323032352d30362d32362032333a35383a3030222c224356223a362c224d4435223a226135383966383837366235383266386163333063373934656635636164353964222c22504e223a312c225543223a302c225553223a22315f315f31222c22695a443038223a6e756c6c7dc8ce454e44
+
+./dtu-benchmark server 14006 14007
+.\dtu-benchmark.exe client COM2 1 http://218.3.126.49:14007
+
+
+INSERT INTO public.t_alarm_link (id, strategy) VALUES (9, '{"name": "固原监控中心-5236", "actions": [{"type": "iot-cap", "parameters": {"body": {"param": "1", "thingId": "03ee26c6-062a-4ae7-8b10-c41b45d739cb", "timeout": 10000, "deviceId": "3aeaf7af-75f0-486b-b21f-f2c7ede00389", "dimCapId": "f3bb4300-32dd-4815-8a8b-b294ff46c809"}}}], "triggers": [{"status": [1, 2], "structure": 5236, "categories": [2]}]}');
+
+
+{"name": "固原监控中心-5236", "actions": [{"type": "iot-cap", "parameters": {"body": {"param": "1", "thingId": "03ee26c6-062a-4ae7-8b10-c41b45d739cb", "timeout": 10000, "deviceId": "3aeaf7af-75f0-486b-b21f-f2c7ede00389", "dimCapId": "f3bb4300-32dd-4815-8a8b-b294ff46c809"}}}], "triggers": [{"status": [1, 2], "structure": 5236, "categories": [2]}]}
+{"name": "总公司监控中心-5225", "actions": [{"type": "iot-cap", "parameters": {"body": {"param": "1", "thingId": "aafa77a4-470c-4f3b-9108-2acfc138b2e9", "timeout": 10000, "deviceId": "ad282960-c5cd-44cb-baef-a4fcf1f843c4", "dimCapId": "f3bb4300-32dd-4815-8a8b-b294ff46c809"}}}], "triggers": [{"status": [1, 2], "structure": 5225, "categories": [2]}]}
+
+
+
+iot-cap http://10.244.152.247:7007/_iota_api/capabilities/invoke {"param":"1","thingId":"effc73fb-b5be-4e98-a270-0f50f497f83f","dimCapId":"f3bb4300-32dd-4815-8a8b-b294ff46c809","deviceId":"f7f533fd-ac89-4086-ab8f-070ecf919f43","timeout":10000}
+
+
+2025-06-27 13:05:39,351 INFO  com.freesun.alarm.model.LinkAction$                           - 发送19:声光报警测试告警失败，内容为：Map(param -> 1, thingId -> effc73fb-b5be-4e98-a270-0f50f497f83f, dimCapId -> f3bb4300-32dd-4815-8a8b-b294ff46c809, deviceId -> f7f533fd-ac89-4086-ab8f-070ecf919f43, timeout -> 10000)，地址为：http://10.244.152.247:7007/_iota_api/capabilities/invoke 响应: 500
+2025-06-27 13:05:40,157 INFO  com.freesun.alarm.StreamingJob$                               - received 
+
+
+
+golang实现一个工具，实现DTU传输数据丢包和延迟的测试，分客户端和服务端。
+客户端连接串口，服务端开启一个tcp端口监听。
+需要能测出丢包和延迟。
+并通过web显示出来（golang web template）
+
+alarm.msg.template.sms=告警通知：${req.alarm.extras.structureName}于${req.alarm.endTime:yyyy-MM-dd HH:mm}在${req.alarm.sourceName}产生${req.alarm.currentLevel}级告警，${over_threshold.name}测量值${over_threshold.value}${over_threshold.unit}超阈值范围${over_threshold.range}，请关注并防范
+templateContent=告警通知：${name}于${time}在${location}产生${warning_level}级告警，${point_name}测量值${value}超阈值范围${threshold_range}，请关注并防范
+templateCode=SMS_489075045
+templateName=交控工程技术
+
+INSERT INTO MY_TABLE(`(dm.name, model, dm.id)`) VALUES ('(\'爆闪警示装置\', \'XH-BST01\', \'15b6737c-cba5-4a9f-8aa5-24686892380c\')');
+da0c7032-9405-4924-b72e-9dbdc758bc23
+
+用正则去识别到
+传感器测量值超过1级告警阈值:水位采集值:27.03m,超1级阈值[26.0~+];温度采集值:39℃,超1级阈值[30.0~100]
+
+组装的地方：
+                  content = s"xxxxxxxx:${fac.name}采集值:$m${fac.unit_name},超${overths.get.level}级阈值[${overths.get.rangeText()}]"
+                  
+                  
+                  
+                  
+                  
+
+if st.session_state.latest_image is not None:
+
+
+rerun("未接收到任何图像",False)
+
+根据不通的页面展示数据
+with st.sidebar:
+    selected = option_menu(
+        "菜单",
+        ["实时数据", "配置", "关于"],
+        icons=["star", "magic", "info"],
+        menu_icon="cast",
+        default_index=0,
+    )
+
+# 根据选择调用相应的页面函数
+if selected == "实时数据":
+    page_data.render()
+elif selected == "配置":
+    page_set.render()
+elif selected == "关于":
+    page_about()
+
+其中page_data.render()有实时刷新：
+time.sleep(0.2)
+    st.rerun()
+    
+每次切换回到实时数据界面时候，下面还有之前显示的内容。
+
+
+INSERT INTO MY_TABLE(`(dm.name, model, dm.id)`) VALUES ('(\'爆闪警示装置\', \'WDM-XSP-P10-RG\', \'85d50ac0-cfea-4cf2-8c0f-4a5d72a55384\')');
+d78cabf4-da1c-473f-8bd3-e14b202d9ffc
+
+编写告警联动说明：
+目前告警进程中的告警联动能力分2种：
+1. 代码固定的，读取DeviceAConfig.json
+    只针对告警产生。
+    {
+    "iotaDeviceMetaId": "d6f6cb30-5eb0-44a7-928e-6b95daad89f3", // 设备原型ID
+    "capMetaId": "f3bb4300-32dd-4815-8a8b-b294ff46c809", // 能力原型ID
+    "param": "1", // 能力调用参数
+    "filter": {
+      "categories": [
+        2
+      ],
+      "status": [
+        1,
+        2
+      ]
+    }
+  }
+    过滤条件支持（根据下面类定义编写具体含义）：
+    case class AlarmConditionFilter(structures: Array[Int],
+                                types: Array[String],
+                                categories: Array[Int],
+                                status: Array[Int],
+                                states: Array[Int],
+                                levels: Array[Int] = null
+                               )
+2. 通过数据库t_alarm_link配置
+    {"name": "固原监控中心-5225", "actions": [{"type": "iot-cap", "parameters": {"body": {"param": "1", "thingId": "03ee26c6-062a-4ae7-8b10-c41b45d739cb", "timeout": 10000, "deviceId": "3aeaf7af-75f0-486b-b21f-f2c7ede00389", "dimCapId": "f3bb4300-32dd-4815-8a8b-b294ff46c809"}}}], "triggers": [{"status": [1, 2], "structure": 5225, "categories": [2]}]}
+    名称name，触发条件triggers，执行动作actions
+    可以有多个触发条件，多个条件是“与”的关系。同时必须配置time_window表示多长时间窗口内的条件可以联合触发。如：{
+    "name": "AI摄像头联动",
+    "time_window": "2 hours",
+    "triggers": [
+      {
+        "source": "abc",
+        "alarm_type": "3007"
+      },
+      {
+        "source": 2,
+        "alarm_type": "2031"
+      }
+    ],
+    "actions": [
+      {
+        "type": "iot-cap",
+        "parameters": {
+          "body": {
+            "deviceId": "12345678980"
+          }
+        }
+      }
+    ]
+  }
+    触发过滤条件支持（根据下面类定义编写具体含义）：
+    case class LinkTrigger(structure: Option[Int],
+                       source: Option[String],
+                       types: Option[Array[String]],
+                       categories: Option[Array[Int]],
+                       status: Option[Array[Int]],
+                       states: Option[Array[Int]],
+                       levels: Option[Array[Int]] = None
+                      )
+
+    动作目前仅支持：iot-cap 表示以太能力调用
+
+object AlarmStatus extends Enumeration {
+    type AlarmStatus = Value
+    // 告警待确认
+    val AlarmToConfirmed = Value(1)
+    // 告警确认
+    val AlarmConfirmed = Value(2)
+    // 告警未通过
+    val AlarmRefused = Value(3)
+
+    // 是否审核通过（或无需审核）
+    def isConfirmed(status: Option[Int]): Boolean = {
+        status.isEmpty || status.get == AlarmConfirmed.id
+    }
+
+    // 是否为待审核状态
+    def isToConfirmed(status: Option[Int]): Boolean = {
+        status.nonEmpty && status.get == AlarmToConfirmed.id
+    }
+}
+object AlarmState extends Enumeration {
+    type AlarmState = Value
+
+    // 新告警
+    val Creation = Value(0)
+    // 次数更新
+    val CountUpgrade = Value(1)
+    // 等级提升
+    val LevelUpgrade = Value(2)
+    // 自动恢复
+    val AutoElimination = Value(3)
+    // 手动确认恢复
+    val ManElimination = Value(4)
+    // 已恢复待确认
+    val EliminationToConfirmed = Value(5)
+
+    val unConfirmedStates: Seq[Int] = Seq(Creation.id, CountUpgrade.id, LevelUpgrade.id)
+
+    def AutoEliminateState(alarmType: AlarmType): AlarmState = {
+        if (alarmType.upgradeStrategy.exists(_.auto_elimination_need_confirm))
+            EliminationToConfirmed
+        else AutoElimination
+    }
+}
+
+object AlarmCategory extends Enumeration {
+    type AlarmCategory = Value
+
+    // 设备类告警
+    val Device = Value(1)
+    // 数据类告警
+    val Data = Value(2)
+    // 开发类告警
+    val Development = Value(3)
+    // 系統类告警
+    val System = Value(4)
+}
+
+object AlarmSourceType extends Enumeration {
+    type AlarmSourceType = Value
+
+    // 设备
+    val Device = Value(1)
+    // 测点
+    val Station = Value(3)
+    // 系統
+    val System = Value(4)
+}
+
+我想实现一个vsdx（viso）索引查询界面。用python+streamlit实现.
+pg数据库存储记录，包括：
+文件名(.vsdx)
+sheet
+
+AI滑坡识别 通过运动识别滚石和滑坡，完成初步检测 黄昊  6.27
+无源标靶 1.基点计算功能支持     卢凯 6.20
+无源标靶 2.矩阵变换 计算支持  卢凯  6.27
+无源标靶 上位机联调调试 殷伟文   6.27
+协议破解 针对ModBus 标准协议格式的报文，基于多条结果拟合出对应的计算关系及系数  张玉祥  6.25
+协议破解 协议自动化生成解析代码并验证执行流水线  殷伟文 6.30
+
+AI技术应用宣讲之IoT 平台协议融合解析基础及AI Agent 在协议识别中的应用。
+1. 首先介绍IOT平台上协议的作用
+> 什么是协议？
+协议--抽象为脚本代码，控制与设备的交互、编解码、数据输出及其他行为。IOT平台将采集模型抽象为接口、能力和属性。【协议】是能力的重要组成部分。目前平台有xxx种设备协议（多于1000多种设备原型），一个设备可能有多个协议，例如采集+控制。
+协议之于设备，相当于xxx。 
+协议中一般包括：【位置识别（设备编号、通道） 数据说明（数据位、什么数据、范围、单位） 其他校验（长度、安全校验（如CRC校验）】（重新组织描述内容）
+
+> 传感器设备协议分类:
+大千世界，千人千面
+...
+
+> 为什么没有标准协议：
+...
+
+> 如何进行协议接入：
+IOT平台是通过采集程序DAC驱动Lua脚本进行协议解析的。当前协议开发流程
+【已知协议结构】设备协议说明文档 >> 协议开发 >> 协议编解码 【设备码流】
+
+> 如何提高协议接入效率：
+次世代（或者叫别的）：
+{
+    动态脚本（高灵活性）
+    可视化编辑（低代码开发）
+    经验丰富的开发人员 （anyway）
+}
+AI时代：我们能做什么
+a) 自动生成
+【协议文档】 >> 协议开发 <<（多次）>> 编解码验证
+b) 协议识别（逆向工程）
+【设备码流】 >> 分析码流 >> 协议结构 >> 协议开发
+
+2. AI Agent 在协议中的应用
+a) 协议识别
+协议识别：从传感器传输码流中识别协议。
+应用场景：在缺少协议说明文档，如年久失修过期产品，文档丢失，第三方运维等场景。
+实现方法以及AI的作用： 码流捕获 >> AI分析结构 >> 匹配现有协议库 、标准协议解析 、 AI直接分析协议格式
+
+难点： 目前市面上没有专攻类似领域的大模型。协议种类繁多（交互复杂、变长、自定义转换），或协议加密。
+我司优势：协议储备
+目前进展：
+    我司协议库特征库建立 （协议通常有固定的帧头（Header）、帧尾（Footer）或特定控制字段，这些就是协议特征）
+    标准协议Modbus-RTU协议码流解析
+    协议识别应用（支持与我司协议库匹配以及标准协议解析）
+后续规划：
+    总体方向：提升准确性、适用范围。完善应用形态，推广使用。
+    完善Modbus-RTU逆向到协议生成（6月）
+    码流特征机器学习（原始码流输入神经网络（如 CNN、LSTM），自动学习协议特征）
+    非标准协议识别方法（完全AI 驱动的协议逆向工程​​：自动从未知码流中推断协议结构）
+
+b) 协议生成
+协议生成：应用于正向工程，使用文本生成大模型生成IOT平台协议脚本代码。
+应用场景：目前协议开发流程提效（低代码或零代码）
+实现方法以及AI的作用：设备协议文档 >> AI解析提炼 >> AI生成 >> 协议自动校验+AI修正（重复）。具体：
+    协议文档解析Qwen-long >> 特征提取(提取类型、厂家、型号、参数、输出、示例) >> (协议编写规范、根据类型找样例脚本) >> 大模型生成（Claud.ai） >> 在线校验
+难点： 。
+我司优势：协议储备；脚本化协议；
+目前进展：完成文档输入到脚本生成的全流程开发
+后续规划：
+    
+    
+
+
+
+
+
+streamlit程序实现无源标靶光电挠度仪配置
+现有图片接收和展示代码：
+
+while True:
+    try:
+        msg = msg_queue.get(timeout=1)  # 每秒等一次，新数据就立即处理
+    except queue.Empty:
+        continue
+
+    if msg.get("cmd") == "image" and "values" in msg:
+        vals = msg["values"]
+        img_b64 = vals.get("image")
+        timestamp = vals.get("time", "")
+        try:
+            img_data = base64.b64decode(img_b64)
+            img = Image.open(BytesIO(img_data))
+        except Exception as e:
+            st.error(f"图片解析失败: {e}")
+            continue
+
+        # 更新界面
+        img_placeholder.image(img, caption=f"时间: {timestamp}", use_container_width=True)
+        time_placeholder.text(f"最后更新时间：{timestamp}")
+
+      
+记录标靶区间，可以有多个标靶区间。 并且可以点击【新增标靶】，切换到streamlit_drawable_canvas的st_canvas后rect选择，选择结束后，输入测点编号和名称。
+当鼠标选中某个rect之后，显示该测点的编号和名称
+
+
+还有一些其他参数需要设置：
+{
+    "_from": "dev",
+    "cmd": "getPoints",
+    "values": {
+        "targets": {
+            "0": {
+                "rectangle_area": {
+                    "x": 49,
+                    "y": 371,
+                    "w": 113,
+                    "h": 91
+                },
+                "threshold": {
+                    "binary": 128,  //二值化阈值 0-255
+                    "gauss": 9    //高斯模糊阈值  0，3，5，7，9，11
+                },
+                "radius": 20.0,
+                "id": 0,
+                "desc": "",
+                "base": false
+            }
+        }
+    }
+}
+首次所有测点信息从tcp获取。
+
+【保存设置】将数据通过tcp下发到设备，并等待设备返回
+{
+    "_from": "setup",
+    "cmd": "setPoints",
+    "values": {
+        "targets": {
+            "0": {
+                "id": 0,
+                "desc": "0_biaoba",
+                "base": false,
+                "radius": 20.0,//标靶圆物理半径（计算偏移的转换依据，要精确）
+                "threshold": {
+                    "binary": 150,
+                    "gauss": 5
+                },
+                "rectangle_area": {
+                    "x": 49,
+                    "y": 371,
+                    "w": 113,
+                    "h": 91
+                }
+            }
+        }
+    }
+}
+
+返回：
+{
+    "_from": "dev",
+    "cmd": "setPoints",
+    "values": {
+        "operate": true
+    }
+}
+
+数据存储在：
+select * from t_alarm_link;表里
+
+{"name": "多结构物声光告警", "actions": [{"type": "iot-cap", "parameters": {"body": {"param": "1", "thingId": "123456", "timeout": 10000, "deviceId": "12345678980", "dimCapId": "223344"}}}], "triggers": [{"status": [1, 2], "structure": 1, "categories": [2]}]}
+如这个示例：
+结构物1(strucutre=1)产生数据类型(category=2)时触发执行以太能力调用(type=iota-cap),执行调用设备能力，需要传入设备ID等参数（thingId归属ThingID、DimCapId能力ID等）
+
+修改进程：安心云告警 Alarm-Flink
+代码：FS-Anxinyun\trunk\codes\services\alarm
+jenkins：https://jenkins.ngaiot.com/job/alarm-flink/
+
+
+
+
+
+
+
+
+
+
+
+postURI := "/artemis/api/resource/v1/cameras"
+	postBody := "{\"pageNo\":1, \"pageSize\":1000}"
+	postResponse, err := HTTPPost(postURI, postBody, 30)
+	if err != nil {
+		fmt.Printf("POST request failed: %v\n", err)
+		return
+	}
+    
+返回：
+{
+  "code": "0",
+  "data": {
+    "list": [
+      {
+        "altitude": null,
+        "cameraIndexCode": "451bdcca02884e98859820ddda686ada",
+        "cameraName": "IPdome",
+        "cameraType": 0,
+        "latitude": null,
+        "longitude": null,
+        "updateTime": "2025-05-28T14:26:15.040+08:00",
+        "viewshed": null
+      }
+    ],
+    "pageNo": 1,
+    "pageSize": 10,
+    "total": 1
+  },
+  "msg": "SUCCESS"
+}
+
+查询所有
+
+
+golang 创建一个摄像头LLM识别配置库（ pg库）,包括摄像头基础配置、大模型检查周期、LLM模型类型（滑坡、collapse、fire等）、或者自定义提示词，是否启用。
+
+create table camera_llm
+(
+    id               serial,
+    type              varchar(16) not null, // 设备类型：yingshi hikisc
+    device_id         varchar(128), // 设备ID
+    serial_no         varchar(128), // 设备序列号
+    name              varchar(128), // 名称
+    model              varchar(128), // 型号
+    channel_no        varchar(128), // 通道号 默认1
+    interval_sec    int,
+       ...
+);
+通过GORM实现。
+并用golang web template实现一个配置界面，列表展示这些信息。
+web中包括新建方法，新建的时候选择类型，
+如果是yingshi,只需要输入序列号。
+如果是Hikisc，则选择一个序列号。其他信息自动获取。（golang有GetHikCamIds方法获取所有待配置序列号、GetHikCamInfo获取其他详细信息）
+还需要配置检查周期、模型方法、自定义提示词、是否启用。
+
+
+golang 改造以下方法：
+
+// SendCapData 发送能力数据
+func (s *SyncService) SendCapData(dcd *pub.DimCapData) error {
+	if dcd.Data == nil {
+		dcd.Data = &pub.RawData{Result: &pub.RawDataResult{Code: errors.Unknown}}
+	}
+	if dcd.Data.Result == nil {
+		dcd.Data.Result = &pub.RawDataResult{Code: errors.Normal, Msg: ""}
+	}
+	if s.notifier != nil {
+		go s.notifier.OnSendingCapData(dcd)
+	}
+	if s.limiter != nil && s.limiter.Limit(dcd) != nil {
+		return nil
+	}
+	return s.cdc.CapDataConsume(dcd)
+}
+
+
+// DimCapData 维度数据
+type DimCapData struct {
+	UserID      string    `json:"userId"`
+	ThingID     string    `json:"thingId"`
+	DimensionID string    `json:"dimensionId"`
+	DimCapID    string    `json:"dimCapId"`
+	CapID       string    `json:"capId"` // CapabilityID
+	DeviceID    string    `json:"deviceId"`
+	ScheduleID  string    `json:"scheduleId"` // = schemeId
+	TaskID      string    `json:"taskId"`     //
+	JobID       int       `json:"jobId"`
+	JobRepeatID int32     `json:"jobRepeatId"`
+	TriggerTime time.Time `json:"triggerTime"`
+	RealTime    time.Time `json:"realTime"`
+	FinishTime  time.Time `json:"finishTime"`
+	Sequence    int       `json:"seq"`      // 同一个 JobRepeatID, 返回多个数据时的顺序号, 0开始.
+	Released    bool      `json:"released"` // Thing 是否 为 Released 状态
+	// Data 协议返回数据, 格式: CapAck
+	Data *RawData `json:"data"` // RawData
+	Key  string   `json:"-"`    // 发送给kafka的Key
+}
+
+创建一个映射表，UserID
+
+一串或多串未知协议的码流，在知道协议解析结果的情况下，尝试分析协议逻辑。  
+首先聚焦modbus协议：
+
+
+
+{"type":"register","instance":"10","key":"soip:40001:24125366","ip":"10.244.2.171"}
+{"type":"register","instance":"10","key":"soip:40001:25076132","ip":"10.244.2.171"}
+
+DISPATCH_ENABLE=true
+DISPATCH_KAFKA=anxin-m1:6663,anxin-m1:6664,anxin-m1:6665,anxin-m1:6666
+DISPATCH_USERS=ce2d7eb2-e56e-422e-8bbe-95dfa18e32f8:anxinyun_data_test,c9989314-4834-479b-bbdc-009a686b21c3:savoir_data_test
+
+
+df -h /kafka-logs/
+free -h
+cat /var/log/kafka/server.log.2025-05-28-18 | grep ERROR | tail -n10
+cat /var/log/kafka/server.log | grep -i zookeeper
+cat /var/log/kafka/server.log.2025-05-28-* | grep -i zookeeper
+cat /var/log/kafka/server.log.2025-05-28-* | grep -i controller
+tail /var/log/kafka/server.log.2025-05-28-22 -f
+top -c
+
+htop
+
+iostat -x 1
+
+sudo bmon -p eno3
+
+sudo iotop -aoP
+
+pidstat -d 1 5
+
+dstat -cdngy --top-io --top-bio
+
+ID,f.ID,FactorID,Name,TableName,Items,ItemNames,ItemDecimalPlaces,ItemUnits,f.Project,PlatformFactorId,FactorParent,FactorType
+axy2.0:14217,axy2.0:137,137,车流量监测,T_THEMES_TRAFFIC_LOAD_SIMPLIFY,"GrossWeight,AxieWeight1,AxieWeight2,AxieWeight3,AxieWeight4,AxieWeight5,AxieWeight6,AxieWeight7,AxieWeight8,AxieWeight9,AxieWeight10","车重,轴1重,轴2重,轴3重,轴4重,轴5重,轴6重,轴7重,轴8重,轴9重,轴10重","2,2,2,2,2,2,2,2,2,2,2","Kg,Kg,Kg,Kg,Kg,Kg,Kg,Kg,Kg,Kg,Kg",axy2.0,0,4,""
+
+ID,f.ID,FactorID,Name,TableName,Items,ItemNames,ItemDecimalPlaces,ItemUnits,f.Project,PlatformFactorId,FactorParent,FactorType
+axy2.0:22367,axy2.0:189,189,车牌监测,T_THEMES_TRAFFIC_LOAD_SIMPLIFY,"GrossWeight,AxieWeight1,AxieWeight2,AxieWeight3,AxieWeight4,AxieWeight5,AxieWeight6,AxieWeight7,AxieWeight8,AxieWeight9,AxieWeight10","车重,轴1重,轴2重,轴3重,轴4重,轴5重,轴6重,轴7重,轴8重,轴9重,轴10重","2,2,2,2,2,2,2,2,2,2,2","Kg,Kg,Kg,Kg,Kg,Kg,Kg,Kg,Kg,Kg,Kg",axy2.0,0,4,""
+
+ID,f.ID,FactorID,Name,TableName,Items,ItemNames,ItemDecimalPlaces,ItemUnits,f.Project,PlatformFactorId,FactorParent,FactorType
+axy4_0:1261,axy4_0:7,7,车辆称重,车流量,"axleCount,axleLoad,carSpeed,direction,lane,license,load,strOverload,weightK","轴数,轴重,车速,方向,车道,车牌,车重,超载,车辆折算系数","3,3,3,3,3,3,3,3,3",",T,km/h,,,,T,,",axy4_0,0,2002,""
+
+ID,f.ID,FactorID,Name,TableName,Items,ItemNames,ItemDecimalPlaces,ItemUnits,f.Project,PlatformFactorId,FactorParent,FactorType
+axy4_0:38498,axy4_0:362,362,渣土车监测,渣土车监测,"direction,latitude,longitude,mileage,speed","方向,纬度,经度,里程,速度","3,3,3,3,3","°, , ,km,km/h",axy4_0,0,7012,""
+
+ID,f.ID,FactorID,Name,TableName,Items,ItemNames,ItemDecimalPlaces,ItemUnits,f.Project,PlatformFactorId,FactorParent,FactorType
+axy4_0:40642,axy4_0:7,7,车辆称重,车流量,"axleCount,axleLoad,carSpeed,direction,lane,license,load,strOverload,weightK","轴数,轴重,车速,方向,车道,车牌,车重,超载,车辆折算系数","3,3,3,3,3,3,3,3,3",",T,km/h,,,,T,,",axy4_0,0,2002,""
+sampleFreq
+
+ID,f.ID,FactorID,Name,TableName,Items,ItemNames,ItemDecimalPlaces,ItemUnits,f.Project,PlatformFactorId,FactorParent,FactorType
+axy4_0:47690,axy4_0:421,421,车辆抓拍单元,抓拍单元,"color,deviceName,image,license,time","颜色,设备名称,抓拍图片,车牌,上报时间","3,3,3,3,3",",,,,",axy4_0,0,6013,""
+
+
+
+{"CK":{"AT":"2025-05-29 13:58:59","GL":"115.00E_21.00N","CCID":"89860842032490022050","DID":"LWPTb5030006","HVER":"1.03","SVER":"2.191","BAT":100,"DB":-67,"ERR":2064,"CV":255,"CNT":1}}
+
+{"ACK":"OK"}
+2025/05/28 13:44:39.985029 [D] Service.OnStatus : mqtt:192.168.1.111:PLC - Closed
+2025/05/28 13:44:39.985034 [D] [mqtt:192.168.1.111:PLC] Reconnecting...
+2025/05/28 13:44:39.985040 [D] Service.OnStatus : mqtt:192.168.1.111:PLC - Closed
+2025/05/28 13:44:39.985044 [D] [mqtt:192.168.1.111:PLC] Reconnecting...
+2025/05/28 13:44:39.985049 [D] [mqtt:192.168.1.111:PLC] Reconnecting...
+2025/05/28 13:44:39.985049 [D] Service.OnStatus : mqtt:192.168.1.111:PLC - Closed
+2025/05/28 13:44:39.985056 [D] [mqtt:192.168.1.111:PLC] Reconnecting...
+2025/05/28 13:44:39.985058 [D] Service.OnStatus : mqtt:192.168.1.111:PLC - Closed
+2025/05/28 13:44:39.985063 [D] [mqtt:192.168.1.111:PLC] Reconnecting...
+2025/05/28 13:44:39.985070 [D] [mqtt:192.168.1.111:PLC] Reconnecting...
+2025/05/28 13:44:39.985071 [D] Service.OnStatus : mqtt:192.168.1.111:PLC - Closed
+2025/05/28 13:44:37.759605 [E] [mqtt:192.168.1.111:PLC] read error: Mqtt unconnected
+2025/05/28 13:44:39.985082 [D] [mqtt:192.168.1.111:PLC] Reconnecting...
+2025/05/28 13:44:37.759602 [E] [mqtt:192.168.1.111:PLC] read error: Mqtt unconnected
+
+
+
+2025/05/28 10:47:15.525223 [E] [mqtt:192.168.1.111:PLC] read error: Mqtt unconnected
+
+
+2025/05/28 10:47:20.513422 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.513508 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.513519 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.513652 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:22.634255 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.513709 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.513771 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.513854 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.513929 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.513944 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.513984 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+2025/05/28 10:47:20.514003 [D] [monitor] OnLink: [ThingID=051cf258-72d7-493e-ab70-d4c96fcc97e0] => 0 
+
+
+发送shengguang告警失败，内容为：Map(param -> 1, thingId -> 03ee26c6-062a-4ae7-8b10-c41b45d739cb, dimCapId -> e5505a0f-db03-4076-9875-5a8e1b068e72, deviceId -> d85677de-ee0f-4325-a5f2-50d7a8c8ec1b, timeout -> 10000)，地址为：http://10.244.152.247:7007/_iota_api/capabilities/invoke
+
+
+数据是固定周期上报的，从ES数据库中查询各个点位的数据，判断数据丢失的粒度。
+python streamlit实现工具数据丢失情况查询：
+输入结构物ID和起始+结束时间。
+通过ES查询（已封装方法def query_es(index, query, token=""):
+    url = f"http://218.3.126.49:19200/{index}/_search"
+    # 设置查询的 header
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.post(url, json=query, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Error querying Elasticsearch: {response.text}")
+        return None）
+        
+查询数据的json：        
+GET anxincloud_themes/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {"terms": {
+          "structure": [
+              3381
+          ]
+        }},
+        {
+          "range": {
+            "collect_time": {
+              "gte": "2025-05-26T00:00:00.000+0800",
+              "lte": "2025-05-26T06:00:00.000+0800"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "create_time": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+查询所有数据，其中查询结果中sensor字段标识传感器ID，collect_time是数据时间。
+每个传感器依次判断，根据周期判断数据出现丢失的情况。
+
+图表展示，展示每个点位（数据点数，理论点数，丢失点数），如果丢失点数>0，这一行为红色提醒。
+图形展示，标注出丢失的时间点
+
+
+
+
+golang实现一个工具，订阅kafka
+输入一个设备：
+
+用kafka bin工具调用查看数据，./kafka-console-consumer.sh --bootstrap-server iota-m2:6667 -topic RawData --from-beginning | grep 'e91633c0-0a11-4361-bfb0-40af04d99f88'  | grep '2025-05-26T05'
+发现数据丢失了2条。 我们的进程也是订阅这个topic，只有这丢失的两条，这会是什么原因，kafka会分裂成多个集群吗？
+
+
+./kafka-console-consumer.sh --bootstrap-server iota-m2:6667 -topic RawData --from-beginning | grep 'e91633c0-0a11-4361-bfb0-40af04d99f88'  | grep '2025-05-26T05'
+./kafka-console-consumer.sh --bootstrap-server iota-n1:6667 -topic RawData --from-beginning | grep 'e91633c0-0a11-4361-bfb0-40af04d99f88'  | grep '2025-05-26T05'
+./kafka-console-consumer.sh --bootstrap-server iota-n2:6667 -topic RawData --from-beginning | grep 'e91633c0-0a11-4361-bfb0-40af04d99f88'  | grep '2025-05-26T05'
+
+
+scala代码拼接以下报文：
+根据数据生成二进制。填充生成报文
+
+协议说明		"数据包字段（16进制）
+以下数据从左到右是从低字节到高字节"	解析结果
+帧头		57 53	帧头
+帧类型		01	数据帧
+数据帧长度		3F 00	63字节
+采集设备SN		E1 84 0D 01 E2 2A 02 00	610100122060001
+时间戳		00 00 00 00 00 00 00 00	1970-01-01 08:00:00.000
+数据项数量 		06	6
+数据项1	传感器类型	44 2F	12100
+	数值	E1 A4 5C 97 52 24 01 00	321412122060001 
+数据项2	传感器类型	45 2F	12101
+	数值 	71 3D 52 41	13.14
+数据项3	传感器类型	47 2F	12103
+	数值	00 00 C0 40	6
+数据项4	传感器类型	44 2F	12100
+	数值	E2 A4 5C 97 52 24 01 00	321412122060002 
+数据项5	传感器类型	45 2F	12101
+	数值 	71 3D 52 41	13.14
+数据项6	传感器类型	47 2F	12103
+	数值 	00 00 E0 40	7
+滚动校验		C6 	198
+校验和		72	0x72
+
+
+
+systemctl enable sshd
+55555
+
+ethtool
+
+vim /etc/sysconfig/network-scripts/ifcfgens8f0
+
+BOOTPROTO=dhcp 改成BOOTPROTO=static
+ONBOOT=no 改成 ONBOOT=yes
+
+IPADDR=10.42.201.103 #静态IP 的配置
+NETMASK=255.255.255.0 # 网关的配置上子网掩码
+GATEWAY=10.42.201.254 # 网关的配置.
+
+
+reload_NetworkManager
+ip a
+
+方法2：
+root 登录后输入 nmtui
+
+
+
+
+Scala实现：
+请选择聚集方式
+aggrMethod
+  {value:'10min',label:'10min'},{value:'30min',label:'30min'},{value:'1h',label:'1h'},{value:'3h',label:'3h'},
+  {value:'6h',label:'6h'},{value:'12h',label:'12h'},{value:'day',label:'天'},{value:'week',label:'周'},
+
+请选择数据格式
+dataFormat
+ {value:'avg',label:'平均值'},{value:'max',label:'最大值'},{value:'min',label:'最小值'},{value:'median',label:'中值'},
+
+实现ES查询方法，以下是参考，要修改支持所有聚集方式和数据格式，并同时聚集多个 itemName: String -> items:Array[String]。
+
+    /**
+      * 按照分钟聚集测点数据
+      */
+    def getStationDataAggMinutes(station: OStation, startTime: DateTime, endTime: DateTime, itemName: String, minutes: Int): Array[ThemeData] = {
+        val query = QueryBuilders.boolQuery()
+            .must(QueryBuilders.termQuery("sensor", station.sid))
+            .must(QueryBuilders.rangeQuery("collect_time").gte(startTime).lt(endTime))
+
+        val isMed = false
+        val aggregation = AggregationBuilders
+            .dateHistogram("by_collect_time")
+            .field("collect_time")
+            .dateHistogramInterval(
+                DateHistogramInterval.minutes(minutes))
+            .timeZone(DateTimeZone.forID("Asia/Shanghai"))
+            .format("yyyy-MM-dd HH:mm:ss")
+            .subAggregation(AggregationBuilders.avg(itemName).field(s"data.$itemName"))
+
+
+        val aggregations = ESHelper.queryAgg(ESHelper.themeIndex, ESHelper.themeType, query, aggregation)
+        val dateHistogram = aggregations.get("by_collect_time").asInstanceOf[Histogram]
+        val dateHist = dateHistogram.getBuckets.asScala.map(histBucket => {
+            val date = DateParser.parse(histBucket.getKeyAsString)
+            val data = histBucket.getAggregations.asMap().asScala.toMap.map(d =>
+                (d._1, if (!isMed) {
+                    convertNaN(d._2.asInstanceOf[ParsedSingleValueNumericMetricsAggregation].value())
+                } else {
+                    convertNaN(d._2.asInstanceOf[ParsedTDigestPercentiles].percentile(50))
+                })
+            ).filter(d => !d._2.isNaN)
+            ThemeData(date.get, data)
+        }).filter(d => d.data.nonEmpty).toArray
+
+        dateHist
+    }
+
+
+
+
 实现AI滑坡灾害识别功能，将海康摄像头接入平台，服务器上部署海康ISC平台、云端抓图解算。并将数据结果通过MQTT发布：
 mqtt.datahub.anxinyun.cn
 发布的topic中包含摄像头的序列号：如20250412CCCHFY8123364
@@ -10,6 +1173,39 @@ alarmMsg	是	string	报警描述
 photoData	是	string	照片文件的base64数据
 
 请帮忙编写云端解算告警数据格式.md
+
+location / {
+        proxy_pass    http://192.168.0.2:8000;
+        proxy_cookie_domain localhost localhost;
+        proxy_cookie_path / /;
+        proxy_connect_timeout 1;
+        proxy_send_timeout 600;
+        proxy_read_timeout 60;
+        proxy_buffering off;
+    }
+golang实现一个客户端+服务端websocket通信程序。
+客户端：
+连接，发送唯一标识ProjectId（string）。
+
+服务端：
+接收存入到Map[Project,Conn]。
+服务端方法： QueryRemote(project,Request) 找到conn发送请求，同步等待响应Response。
+
+（Request和Response是接口，设计参考HTTP包括方法、参数，通过Protobuf进行数据传输）
+
+实现一个场景，继承Request/Response的特殊实现：请求指定id的传感器设备数据的查询：
+type SensorDataRequest struct {
+	SensorId string
+	Start    time.Time
+	End      time.Time
+}
+
+type SensorDataResponse struct {
+	Datas []struct {
+		Time   time.Time
+		Values []float64
+	}
+}
 
 
 用scalaj.http实现上报：

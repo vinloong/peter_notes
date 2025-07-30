@@ -2424,3 +2424,28 @@ systemctl status keepalived
 }'
 
 snap restart docker
+
+135. 清理磁盘空间
+du -h --max-depth=1 | sort -hr
+
+root@anxin-m2:~# rm -rf /home/anxin/et-log/
+
+sudo route add default gw 10.8.10.1
+
+136. 为什么：docker推送镜像失败;root@iv-ydtrju48w0wuxjsooe7j:~/.docker# docker push registry.ngaiot.com/tools/nexus3:20250703
+The push refers to repository [registry.ngaiot.com/tools/nexus3]
+Get "https://registry.ngaiot.com/v2/": net/http: TLS handshake timeout
+
+
+查询用到指定镜像的POD：
+root@anxinyun-m1:/home/anxinyun#  kubectl get pods --all-namespaces -o jsonpath='{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{.spec.containers[*].image}{"\n"}{end}' | grep anxincloun
+
+
+如果该仓库使用 HTTP 或 自签名 TLS，需要在 /etc/docker/daemon.json 配置中加入：
+
+json
+复制
+编辑
+{
+  "insecure-registries": ["registry.ngaiot.com"]
+}
