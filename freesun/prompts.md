@@ -1,3 +1,587 @@
+用streamlit实现以下功能“
+
+查找所有soip设备的在线状态（从pg数据库）
+
+SELECT a.*, dstdi."deviceId", dc.id, dc."protocolMetaId" dcpmid, cm."protocolMetaId" cmpmid from (
+		SELECT t."belongTo", layout."thingId", lnk.id, lnk."parentLinkId",
+				lnk."fromDeviceInterfaceId", it.key, im.name, di.properties,
+				lnk."toDeviceInterfaceId", di."deviceId", dmi."deviceMetaId"
+			FROM "LayoutLink" lnk, "LayoutNode" node ,"Layout" layout,
+				"DeviceInterface" di, "DeviceMetaInterface" dmi, "InterfaceMeta" im , "InterfaceType" it, "Thing" t
+			WHERE
+				layout."thingId" = t.id
+				AND lnk."fromDeviceInterfaceId" = di.id AND di."deviceMetaInterfaceId" = dmi.id
+				AND dmi."interfaceMetaId" = im.id AND im."interfaceTypeId"=it.id
+				AND lnk."fromLayoutNodeId" = node.id AND node."layoutId" = layout.id
+		) a
+	LEFT JOIN "DeviceInterface" dstdi ON dstdi."id" = a."toDeviceInterfaceId"
+	LEFT JOIN "DeviceCapability" dc on dc."deviceInterfaceId" = a."toDeviceInterfaceId"
+	LEFT JOIN "CapabilityMeta" cm on cm.id = dc."capabilityMetaId";
+    
+解析返回的 properties （JSON）、deviceId(string)形成Soip信息字典。
+其中：properties提取其中的id (string)和port （int）属性，形成KEY： soip:$port:$id。
+
+依次轮询Soip字典中的数据（可以考虑并发）：
+1. 查询物理连接状态(用KEY查)
+    root@anxin-m1:/home/anxin# curl 10.244.7.124:8080/soip/get?key=soip:400005:20230838
+    >> Key 'soip:400005:20230838' not found
+    root@anxin-m1:/home/anxin# curl 10.244.7.124:8080/soip/get?key=soip:40005:20230838
+    >> {"Pod":"10.244.4.170:40005","Out":"10.244.0.0:41171","Created":"2025-08-14T06:06:56.568350296+08:00"}
+2. 查询Prometheus中在线状态（DAC在线状态）（用DeviceId查询）
+    http://218.3.126.49:19090/
+    iota_dac_device_status{deviceId='000651ac-26b2-44bb-aba2-bd7c3dd2b454'}
+    返回状态1表示在线。 无或者0表示离线。
+对比1、2的结果形成表单输出。并显示1、2状态不一致的个数。
+
+
+
+kubectl create secret docker-registry zhiwucloud \
+  --docker-server=registry.cn-hangzhou.aliyuncs.com \
+  --docker-username=lixiaomin@anxinjoy.com \
+  --docker-password=u698EK1pk1 \
+  --docker-email=lixiaomin@anxinjoy.com \
+  -n iota
+
+
+阅读代码，编写一个Markdown文件《数据上报编程指南》，用中文，包括：
+1. http_comm （json模板+上报）
+2. mqtt_comm （json模板+mqtt支持介绍）
+3. 特殊的上报（通过protobuf）
+4. 介绍分布式 Actor的模式实现多客户端上报。（主节点Master读取Kafka分发到各个上报客户端做单独业务处理）
+
+能写成Slidev格式的md格式吗
+
+增加：
+0. 总体流程图
+   Kafka实时数据-> Master -- --> Slave: Init/Refresh (从数据库更新配置json) --> 解析到自己的配置类(case class XXXConfig) --> 重载upload方法消费Actor消息 --> 拼接数据 --> 上报动作
+1. 数据结构介绍（StationData）
+2. uploader中几个方法的固定写法： upload(data:StationData)
+def init(): Unit
+
+    def upload(data: Array[IotaData]): Unit = {}
+
+    def upload(data: Array[StationData]): Unit = {}
+
+    def upload(data: Array[RealTimeAggData]): Unit = {}
+
+    def upload(data: Array[AggData]): Unit = {}
+
+    def initDebug(): Unit = {} 用于测试
+    
+    def refresh(): Unit = {} 用于定时刷新配置（也可用于定时.继承自Expiring默认周期10分钟）
+3. 上报动作可以使用：
+    mqtt-OneMqttClientWrapper
+    http-http_comm.httpRequest
+    tcp-TcpSender
+3. 进阶写法：
+    + 完全自定义的上报
+        重载uploader。读取、刷新配置 -> 拼接数据 -> 调用上报动作
+    + 缓存处理
+        自定义Map存储。 如gaoTai_province（见下面补充代码）
+    + 查询历史
+        查询ES中的历史数据。参见下面getLastData方法代码
+    + 掌握技巧
+        搜索代码（比如AES算法全局搜索，实现过的）
+        
+/*
+*
+* 	id: 测点id
+* 	name:测点名称
+* 	structure：归属结构物
+*	acqTime： 采集时间
+*	devicesData：设备数据
+*	theme：主题数据
+*
+ */
+@JsonIgnoreProperties(value = Array("theme", "isOk"), ignoreUnknown = true)
+case class StationData(var station: Station,
+                       acqTime: DateTime,
+                       taskId: String,
+                       data: Option[Map[String, Any]],
+                       deviceDatas: Map[String, DeviceData] = Map(),
+                       var state: Int = 0 // 当前数据的告警等级 测点告警大于0,和告警等级保持一致，设备告警=-1,代表存在设备告警
+                      ) 
+                      
+object gaoTai_province extends Logging {
+  logIdent = "[甘肃山丹县和高台县数据上报省水利厅API]"
+  var sk_caches: Map[skGroup_cache_key, skGroup_cache_value] = Map()
+
+  def upload(data: AggData,
+             config: CommUploadConfig,
+             subc: CommUploadContent,
+             ac: Option[AuthContent],
+             batchId: Option[String]): (Boolean, String) = {
+    try {
+      var p:Map[String, Any] = http_comm.formatParams(data, config.http, ac)
+
+      val appKey = p.getOrElse("appKey", "").toString
+      val secret = p.getOrElse("secret", "").toString
+      val timestamp = System.currentTimeMillis().toString
+      val nonce = generateRandomString(12)
+      val sign = getSign(appKey, secret, timestamp, nonce)
+      if (sign.isEmpty) {
+        throw new RuntimeException("Sign is empty")
+      }
+
+      logger.info(s"sign = getSign($appKey, $secret, $timestamp, $nonce)", sign, appKey, secret, timestamp, nonce)
+
+      val extraParams: Map[String, Any] = Map(
+        "timestamp" -> timestamp,
+        "nonce" -> nonce,
+        "sign" -> sign
+      )
+
+      p ++= extraParams
+
+      // 三向位移要z,xy 要分开上报
+      if (data.station.factor.protoCode == "4003"){
+        val zBody = subc.custom.get.get("z").get.toString
+        val xyBody = subc.custom.get.get("xy").get.toString
+        val formatedZBody = http_comm.formatContent(zBody,p)
+        val formatedXYBody = http_comm.formatContent(xyBody,p)
+
+        val (rs1, _, errstr1) = httpRequest(config.http, subc, p, Some(formatedZBody), None, ac)
+        val (rs2, _, errstr2) = httpRequest(config.http, subc, p, Some(formatedXYBody), None, ac)
+
+        (rs2,errstr2)
+
+      }else{
+        http_comm.uploadAggData(data, config, subc, ac, extraParams)
+      }
+
+    } catch {
+      case ex: Exception =>
+        ex.printStackTrace()
+        logger.warn(s"$AggData 上报出错：$ex")
+        (false, ex.getMessage)
+    }
+
+  }
+
+  def generateRandomString(length: Int): String = {
+    val chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+    val random = new Random
+    val randomString = (1 to length).map(_ => chars(random.nextInt(chars.length))).mkString
+    randomString
+  }
+
+  def getSign(appKey:String,secret:String,timestamp:String,nonce:String): String = {
+    val data = secret + appKey + timestamp + nonce + secret
+
+    try {
+      val md5 = MessageDigest.getInstance("MD5")
+      val digest = md5.digest(data.getBytes(StandardCharsets.UTF_8))
+      val result = new StringBuilder
+      for (b <- digest) {
+        result.append(String.format("%02x", Byte.box(b)))
+      }
+      println(result)
+      return result.toString
+
+    } catch {
+      case ex: Exception =>
+        logger.error("sign 计算异常", ex)
+    }
+
+    return ""
+  }
+
+}
+// 获取上一天同一时间的数据
+    def getLastData(data: StationData): Option[ThemeData] = {
+        // for test
+        // return Some(ThemeData(DateTime.now.plusDays(-1), Map("displacement" -> 1.2)))
+        // 前后容差一小时
+        val lastDay = data.acqTime.plusDays(-1)
+        val startTime = lastDay.plusMinutes(-30)
+        val endTime = lastDay.plusMinutes(30)
+        val themes = StorageConsumer.queryStationData(data.station.id, startTime, endTime)
+        val lastDayMills = lastDay.getMillis
+        themes.sortBy(a => math.abs(a.acqTime.getMillis - lastDayMills)).headOption
+    }
+streamlit实现一个快速排查数据问题的工具（ILook);
+并用golang实现一个LookProxy代理程序，可以读取服务器上的Kafka日志、读取k8s api。
+输入：
+设备ID或名称。
+
+从以下几个数据源中查找相关数据。
+1. IoT数据库pg (记录Thing、设备、部署基础信息)
+2. 监测数据库PG （记录测点（绑定设备）和结构物（对应Thing）信息、监测项信息（检测内容、单位等））
+3. 记录传感器数据 Elasticsearch数据
+4. 状态记录 Prometheus
+5. 通过K8S接口获取容器日志
+6. 采集相关的日志库（日志ES）
+7. kafka中相关数据记录
+
+
+点击【诊断】开始分析设备数据问题：
+有一个时间范围的输入（默认最近12小时）
+1. 查找并展示设备的相关信息
+2. 查找设备关联测点及其相关信息
+3. 查找设备数据、测点数据
+4. 通过LookProxy读取Kafka中数据（用设备ID过滤）
+5. 通过【设备连接KEY】 查询ES日志
+
+
+scala Akka Actor程序一段时间后会出现不处理数据的情况，代码里只有“ actor 发送 capId=”的日志
+
+g._2.groupBy(_.thingId).foreach(tgps => {
+                    tgps._2.groupBy(_.capId).foreach(tds => {
+                        var capId = s"${tds._2.head.thingId}.${tds._1}"
+
+                        //本地化按照设备id 来actor处理
+                        if (!configLoad.isCloud) {
+                            capId = s"local.cap=${tds._1}.dim=${tds._2.head.dimensionId}"
+                        }
+
+                        logger.info(s" actor 发送 capId=[$capId],len= ${tds._2.length}")
+
+                        val actOpt = actors.get(capId)
+                        //logger.info(s"===========kafka parse is over [${tds._2.length}] [${new DateTime().getMillis - now_s.getMillis}ms]")
+                        if (actOpt.nonEmpty)
+                            actOpt.get ! tds._2
+                        else {
+                            val act = if (configLoad.isCloud)
+                                akkaSystem.actorOf(Props(new ThingActorCloud(capId, consumerGroup, isTrunk, consumer)))
+                            else
+                                akkaSystem.actorOf(Props(new ThingActor(capId, consumerGroup, isTrunk, consumer)))
+                            actors += capId -> act
+                            act ! tds._2
+                        }
+                    })
+
+                })
+                
+并且查看日志会出现以下这个报错：
+java.util.concurrent.ExecutionException: java.util.concurrent.TimeoutException: Futures timed out after [10 seconds]
+	at com.google.common.util.concurrent.AbstractFuture$Sync.getValue(AbstractFuture.java:299)
+	at com.google.common.util.concurrent.AbstractFuture$Sync.get(AbstractFuture.java:286)
+	at com.google.common.util.concurrent.AbstractFuture.get(AbstractFuture.java:116)
+	at com.google.common.util.concurrent.Uninterruptibles.getUninterruptibly(Uninterruptibles.java:135)
+	at com.google.common.cache.LocalCache$Segment.getAndRecordStats(LocalCache.java:2346)
+	at com.google.common.cache.LocalCache$Segment.loadSync(LocalCache.java:2318)
+	at com.google.common.cache.LocalCache$Segment.lockedGetOrLoad(LocalCache.java:2280)
+	at com.google.common.cache.LocalCache$Segment.get(LocalCache.java:2195)
+	at com.google.common.cache.LocalCache.get(LocalCache.java:3934)
+	at com.google.common.cache.LocalCache.getOrLoad(LocalCache.java:3938)
+	at com.google.common.cache.LocalCache$LocalLoadingCache.get(LocalCache.java:4821)
+	at comm.utils.ConfigHelper$.getDeviceInfo(ConfigHelper.scala:237)
+    
+    
+    
+
+
+registry.ngaiot.com/iot/iot-dac:62
+registry.cn-hangzhou.aliyuncs.com/zhiwucloud/iota-dac:62
+
+
+8月 11 10:54:28 iota-m2 kubelet[1424]: W0811 10:54:28.428143    1424 kubelet_pods.go:800] Unable to retrieve pull secret iota/registry-savoir-secret for iota/iota-dac-watcher-79499d664b-nz5
+
+1a6c506-765e-11f0-88c9-c81f66cfe365 ("iota-dac-4_iota(11a6c506-765e-11f0-88c9-c81
+8月 11 10:54:00 iota-m2 kubelet[1424]: W0811 10:54:00.425586    1424 kubelet_pods.go:800] Unable to retrieve pull secret iota/zhiwucloud for iota/iota-dac-4 due to secrets "zhiwucloud" not 
+8月 11 10:54:00 iota-m2 kubelet[1424]: I0811 10:54:00.425820    1424 kuberuntime_manager.go:499] Container {Name:iota-dac Image:registry.ngaiot.com/iot/iot-dac:62 Command:[] Args:[] Working
+8月 11 10:54:00 iota-m2 kubelet[1424]: E0811 10:54:00.427823    1424 pod_workers.go:182] Error syncing pod 11a6c506-765e-11f0-88c9-c81f66cfe365 ("iota-dac-4_iota(11a6c506-765e-11f0-88c9-c81
+8月 11 10:54:03 iota-m2 kubelet[1424]: W0811 10:54:03.425780    1424 kubelet_pods.go:800] Unable to retrieve pull secret iota/registry-savoir-secret for iota/gateway-master-567b4f645b-b42n9
+8月 11 10:54:15 iota-m2 kubelet[1424]: W0811 10:54:15.427795    1424 kubelet_pods.go:800] Unable to retrieve pull secret iota/zhiwucloud for iota/iota-dac-4 due to secr
+
+
+# 自动验证按钮
+    if st.button("自动验证"):
+        if not st.session_state.test.code:
+            st.error("请先生成测试代码")
+        else:
+            with st.spinner("正在执行自动验证..."):
+                # 执行当前代码
+                execution_result = execute_code(st.session_state.test.code)
+                
+                # 将原代码、执行结果和预期结果传给大模型
+                improved_code = improve_code_with_llm(
+                    original_code=st.session_state.test.code,
+                    execution_result=execution_result,
+                    expected_outputs=expected_outputs,
+                    model=selected_model
+                )
+                
+                # 更新代码并执行
+                st.session_state.test.code = improved_code
+                st.code(improved_code, language="lua")
+                
+                # 重新执行改进后的代码
+                response,result_map = execute_code(improved_code)
+                
+                if response.status_code == 200:
+                    st.success("请求成功！响应内容：")
+                    st.json(response.json())
+                else:
+                    st.error(f"请求失败，错误：{response.text}")
+                # 修改要支持多次验证。
+                # 最好能够记录每次验证的过程代码、结果。
+                # response中的data是返回的数据，response['data']['data']是具体的结果,用它和expected_outputs对比.
+                # response中的log是本次执行的日志信息。
+                # 对比方法： expected_outputs字典中的每个非空元素的键值对都要在result_map中找到对应的键，并比较值是否相等。（字符串转换成数字对比，并且允许误差）
+                # 如果与预期结果不匹配，则执行多次验证，直到满足预期结果为止。 
+                # 将本次返回的log信息（如果代码执行错误，会显示具体的报错信息和报错行号）、本次返回的数据（如果有）、期望的数据以及代码一并传感器大模型，让它重新生成协议解析代码。
+                # 需要大模型返回完整的代码，以及本次修改的内容。
+                # 通过代码解析，读取到这两部分的返回。
+                st.json(response)
+
+以下内容是给出的一个目录列表，编写一个markdown文件。
+每个公式都可以从目录中链接到指定章节，并编写每个公式的说明。
+算法梳理:
+1. 设备计算公式、物理量计算公式
+    通用振弦计算公式,ε=K*(Fi^2-Fo^2)+Kt*(Ti-To)
+    雨量计算
+    量水堰渗流计算（尾矿库）
+    瞬时流量公式,Q=h*l0*u/1000
+    建筑物倾斜率计算,F=tan(θi-θ0)
+    倾角温补公式,X=x-AxT^2-BxT-x0;Y=y-AyT^2-ByT-y0;Z=z-AzT^2-BzT-z0
+    振动短索索力识别公式,T=4*m*l^2*f1^2/n^2 - n^2*π^2*EI/l^2
+    测斜公式,Δl=c*[sin(αi)-sin(α0)]
+    压力变送器公式,Δh=(Pi-P0)/(ρ*g)+H0
+    渗流计算,1.33[H0+K(F－Fo)/1000]^2.465(m3/s)
+    干滩长度计算,l=(H-(h+hi))/s
+    三维位移转换公式,X=kx*((y-y0)*sinθ-(x-x0)*cosθ+c1);Y=ky*((y-y0)*cosθ+(x-x0)*sinθ+c2);Z=kz*(z-z0)
+    应变计计算轴力,F=A*E*[(∑εi)/n]+F0
+    测斜倾角计算挠度,Yn=Yn-1+((Xn-Xn-1)/2)*((An-1*π/180)+(An*π/180)–2*M
+    应变计算应力,σ=Eε
+    力转应力,σ=F/A
+    排放量计算公式,P=Q*C/1e6
+    轨心距计算公式,L=(X0*S1)/S-l+L0
+    空气数据修正公式,V=k*x+c
+    水位插值计算,Δh=(Pi-P0)/(ρ*g)+H0;V=(V2-V1)/(h2-h1)*(Δh-h1)+V1
+    三向测斜公式,Δl=c*[sin(αi)-sin(α0)]
+    建筑物倾斜率计算,F=tan(θi-θ0)×100%
+    雷达水位插值计算,Δh=DAQi-DAQ0;V=(V2-V1)/(h2-h1)*(Δh-h1)+V1
+    应变计计算钢筋混凝土支撑轴力(单),"Nc=δ(Ec*Ac/Ei+Ai),δ=εi/Aj"
+    干滩长度计算,l=(H-h-(Pi-P0)/(ρ*g))/s
+    雷达物位计坡比干滩长度计算,l=(H-(h-hi))/s
+    压力变送器公式（带温补）,Δh=(Pi-P0-Kt*(Ti-T0))/(ρ*g)+H0
+    激光测距,Δh=(len0-leni)*H/len0
+    支撑轴力计算,"Nc=δ(Ec*Ac/Ei+Ai),δ=(∑[k*(fi^2-f0^2)/Aj])/n"
+    应变花计算公式,Sr=1/2*E+1/(2*(1-μ))|Sr=1/3*E+1/(3*(1-μ))|Sr=1/4*E+1/(2*(1-μ))|Sr=1/2*E+4/(3*(1-μ))
+    应变计计算钢筋混凝土支撑轴力,"N=(Ec*Ac+Es*As)*ε,ε=AVG(εi)"
+    输电塔自动调平计算公式,"h(i,j)=[i*a*sin(θ_x) + j*b*sin(θ_y)]/2; d = min{h(i,j)}; H(i,j) = h(i,j) - d; {i=±1,j=±1}"
+    应变计计算轴力(组合),F=A*E*[(∑εi)/n]+F0
+    钢筋混凝土支撑轴力计算,Nc=[δ(Ec*Ac/Ei+Ai)]/(Ai/n)，δ=(∑δi)/n
+    支撑轴力计算(温度平均),"Nc=δ(Ec*Ac/Ei+Ai),δ=(∑[k*(fi^2-f0^2)/Aj])/n;Δt=Δt,Δt=AVG(tv)"
+    库水位和干滩计算公式,h=h0+h1-hi;l=(l0+l1-li-h)*l2/(l0-h0)+c
+    混凝土温度组合计算,y=concrete_temperature(x)
+    
+2. 分组公式
+    连通管沉降分组
+    连通管沉降分组级联
+    测斜管内部位移公式
+    
+3. 振动相关
+    振动索力识别公式,T=4*m*l^2*f1^2/1000
+    振动特征参数计算,"phy={pv,ppv,rms}"
+    振动等效声级计算,"phy={soundLevel,arrAcc}"
+    振动积分,"phy={pv,ppv,rms}"
+    振动二次积分,"phy=Inter2{pv,ppv,rms}"
+    
+4. 后计算/过滤识别算法
+    滑窗、平滑：
+        取中值
+        限幅
+        滑动平均
+        方差判断平均
+        滤波算法
+        去极值移动平均
+        加权滑动平均
+        中值平均
+        限幅平均
+
+    毛刺识别：
+    趋势判断：    
+
+DAC旧顺序
+// 通讯服务
+	gAS = conn.NewService()
+	gAS.Start()
+	switch zook.RunMode {
+	case zook.Single:
+		gAS.Prepare(gDS.GetRootInterfaces(""))
+	case zook.Multi:
+		tids, err := zook.Service.GetSources()
+		if err != nil {
+			panic(err)
+		}
+		for _, tid := range tids {
+			gAS.Prepare(gDS.GetRootInterfaces(tid)) // 监听准备
+		}
+	}
+
+	// SM 协议沙箱
+	log.Info("[main] start sandbox manager...")
+	sm := driver.NewManager()
+
+	// gSLM 任务/网络/流量监听器
+	gSM = stat.NewSysMonitor(iKafkaSyncer)
+	gAS.SetLinkEventListener(gSM) //流量/网络
+
+	// gSS 任务调度
+	log.Info("[main] start scheme service...")
+	gSS = scheme.NewService(conf, gAS, iKafkaSyncer, sm, gSM)
+	gSS.StartSite(gDS)
+
+
+python+streamlit实现:
+输入：
+1. 一个文本输入框，输入结构物ID列表，输入这种格式 "a","b" （或者a,b 或者a换行b）。一个时间基准（输入时间）。
+2. 从pg数据库中查询对应的设备ID。select distinct(d.id) from "Device" d,"CapabilityMeta" cm,"CapabilityProperty" cp  where
+d."deviceMetaId"=cm."deviceMetaId" and cm.id=cp."capabilityMetaId" and cp.category='Output' and
+"thingId" in ('c25d70dc-cd09-4247-8e60-2093a3219c0b')
+3. 根据设备ID从ES中查询最新数据。
+    http://localhost:9200/anxincloud_last_raw/_search
+    {
+  "query": {
+    "bool": {
+      "must": [
+        {"terms": {
+          "iota_device": ["c7b67fad-1366-4911-907a-e46c242acfa6",...]
+        }}
+      ]
+    }
+  }
+}
+查询结果：
+_source" : {
+          "structId" : 5155,
+          "iota_device_name" : "表面式应变计1111",
+          "data" : {
+            "am" : 66.012,
+            "frequency" : 1488.398,
+            "phy_x" : 19.801,
+            "physicalvalue" : 1488.398,
+            "temprature" : 21.238
+          },
+          "collect_time" : "2024-12-10T17:06:00.000+0800",
+          "meta" : {
+            "am" : "幅值(mV)",
+            "frequency" : "频率(Hz)",
+            "phy_x" : "信噪比(°)",
+            "physicalvalue" : "微应变(με)",
+            "temprature" : "温度(℃)"
+          },
+          "iota_device" : "c7b67fad-1366-4911-907a-e46c242acfa6",
+          "create_time" : "2024-12-10T17:06:37.791446257+08:00"
+        }
+        
+        读取到每个设备的最新数据时间collect_time
+    
+4.  根据基准时间判断，如果在基准时间之后，表示数据在线。
+
+界面中显示所有点位在线或离线的状态。
+
+
+
+python实现：
+指定目录下有多个json文件
+```json
+[
+  {
+    "桥梁唯一编码": 24011,
+    "测点唯一编码": "240111",
+    "测点编号（对内）": "梁板挠梁1/4左幅01",
+    "测点编号": "cc-pld-g05-l01",
+    "测点位置": "梁板挠梁1/4左幅01",
+    "监测类别": "RES",
+    "监测类型": "PLD",
+    "监测内容编码": 334,
+    "监测内容": "竖向方向变形"
+  },
+  {
+    "桥梁唯一编码": 24011,
+    "测点唯一编码": "240112",
+    "测点编号（对内）": "梁板挠梁1/4左幅01",
+    "测点编号": "cc-pld-g05-l01",
+    "测点位置": "梁板挠梁1/4左幅01",
+    "监测类别": "RES",
+    "监测类型": "PLD",
+    "监测内容编码": 334,
+    "监测内容": "水平方向变形"
+  }
+]
+
+
+
+```
+合并这些json文件生成一个字典，key是【测点编号（对内）】，值为该对象。
+
+你是一个IoT物联网行业专家，并且精通python编程和数据库编程。
+用python+streamlit实现
+-- 查询pg数据库得到以下数据。
+select st.structure_name_cn as 结构物名称,
+       st.id as 结构物ID,
+       f.safety_factor_type_name as 监测因素名称,
+       f.safety_factor_type_id as 监测因素ID,
+       s.sensor_location_description as 传感器名称,
+       s.sensor_id as 传感器ID
+from t_sensor s,t_structure st,t_safety_factor_type f where s.safety_factor_type_id=f.safety_factor_type_id and s.struct_id=st.id and s.is_deleted=false;
+
+-- ID字段都是整型数据，名称字段均为字符串，
+-- 实现三级联动的筛选框【结构物 > 监测因素 > 传感器】。最后一级【传感器】支持多选。
+
+-- 选择完传感器之后，点击按钮【查询省平台统计数据】。
+
+-- 查询CK数据库(查询传感器的聚集数据)
+-- 输入查询时间范围
+select Values from province_data_statistic where MonitorCode='2401137' and CollectTime between '2025-07-30' and '2025-07-31';
+Values是Array[Float]字段。
+根据首条数据判断该数组的长度，然后依次每列的时间曲线。
+
+
+
+@所有人   培训通知：
+一、培训主题：后端数据接入流程介绍
+二、培训时间：2025年 7 月 28 日 14:00开始
+三、培训地点：镇江休息室
+四、培训导师：@殷伟文
+五、参会人员：后端开发人员、以及感兴趣的各位同事
+六、培训流程：
+1、后端数据接入流程介绍
+2、交流环节
+https://doc.weixin.qq.com/doc/w3_Ac4A4wYjAO8CNnDBH4R03RimFq2tx?scode=AAkAvwd3ABE8C02D53Ac4A4wYjAO8
+培训后提交培训总结至培训导师抄送研发组长，事关绩效相关分数，请各位协调好手上工作，准时参加，如有请假人员，请提前沟通，谢谢~
+
+
+采用 1D - CNN 字节统计 + BiLSTM 序列关系 + GraphSAGE 建模。1D - CNN（一维卷积神经网络）用于提取字节级统计特征，通过不同大小的卷积核在协议码流上滑动，提取码流中的局部特征，如字节的频率分布、特定字节模式等，对未知协议进行大类识别，例如区分 Modbus/TCP、HJT212 等常见协议类型。BiLSTM（双向长短期记忆网络）用于捕捉序列关系，协议数据通常具有一定的顺序性和上下文依赖关系，BiLSTM 能够同时从正向和反向对序列进行处理，更好地理解字段之间的先后顺序和语义关联，实现中粒度的结构推理，例如识别字段边界与含义。GraphSAGE（Graph SAmple and aggreGatE）用于对协议数据进行图结构建模，将协议中的字段、帧以及它们之间的关系构建为图结构，通过采样和聚合邻居节点的特征，学习到协议的全局结构特征，进一步提升协议识别的准确性和对复杂协议的处理能力，实现细粒度字段语义还原，完成从协议码流到物模型接口的自动映射。​
+协议变体与复杂场景适配​
+全流程自动化平台集成​
+多场景设备接入验证​
+技术成果标准化输出​
+
+
+有关调用实时(JIT)调试而不是此对话框的详细信息，
+请参见此消息的结尾。
+
+************** 异常文本 **************
+System.OutOfMemoryException: 引发类型为“System.OutOfMemoryException”的异常。
+   在 DAAS.comm.CircleList`1..ctor(Int32 capcity, Int32 page) 位置 m:\Jenkins\workspace\DAAS-DotNet4\DAAS\comm\CircleList.cs:行号 55
+   在 DAAS.Sample.SamplingMana..ctor() 位置 m:\Jenkins\workspace\DAAS-DotNet4\DAAS\Sample\SamplingMana.cs:行号 12
+   在 DAAS.Sample.SampleChannel..ctor(Channel channel, OscSamSimulateProperty prop) 位置 m:\Jenkins\workspace\DAAS-DotNet4\DAAS\Sample\SampleChannel.cs:行号 57
+   在 DAAS.Sample.IsolateSampleControler.Init(ChannelList chlist, Boolean startTimer) 位置 m:\Jenkins\workspace\DAAS-DotNet4\DAAS\Sample\IsolateSampleControler.cs:行号 34
+   在 DAAS.MainControlSamOsc.LoadDefault(Boolean startTimer) 位置 m:\Jenkins\workspace\DAAS-DotNet4\DAAS\MainControlSamOsc.cs:行号 135
+   在 DAAS.MainControlSamOsc.StartOscFun(Boolean autoStartflag, Boolean silence) 位置 m:\Jenkins\workspace\DAAS-DotNet4\DAAS\MainControlSamOsc.cs:行号 419
+   在 DAAS.Views.frmGraph.toolStripButtonOsc_Click(Object sender, EventArgs e) 位置 m:\Jenkins\workspace\DAAS-DotNet4\DAAS\Views\frmGraph.cs:行号 85
+   在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+   在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
+   在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+   在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+   在 System.Windows.Forms.ToolStripItem.FireEventInteractive(EventArgs e, ToolStripItemEventType met)
+   在 System.Windows.Forms.ToolStripItem.FireEvent(EventArgs e, ToolStripItemEventType met)
+   在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+   在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+   在 System.Windows.Forms.Control.WndProc(Message& m)
+   在 System.Windows.Forms.ScrollableControl.WndProc(Message& m)
+   在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+   在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+   在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+   在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+
+
 在事件发生前，涉事数据库主要采取了以下几项基础安全措施：
 1. 数据库监听的非标准端口 19200，意图避免默认端口被轻易扫描，但此类“安全通过模糊”的措施效果有限。
 2. 通过 Nginx 做反向代理，设置了基础的 IP 白名单控制（限制访问源 IP），但由于配置疏漏，未覆盖所有接口路径，导致部分接口仍然可以从公网访问。

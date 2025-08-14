@@ -1,4 +1,30 @@
-用Uptrends监控网站外部访问情况
+针对部分网站访问速度慢，进行服务访问速度的排查工作：
+
+### 服务器流量排查
+
+监控系统流量
+
+```sh
+#!/bin/bash
+while true; do
+  RX1=$(cat /sys/class/net/eno1/statistics/rx_bytes)
+  TX1=$(cat /sys/class/net/eno1/statistics/tx_bytes)
+  sleep 1
+  RX2=$(cat /sys/class/net/eno1/statistics/rx_bytes)
+  TX2=$(cat /sys/class/net/eno1/statistics/tx_bytes)
+
+  RX_RATE=$(( (RX2 - RX1) / 1024 ))
+  TX_RATE=$(( (TX2 - TX1) / 1024 ))
+  echo "RX: ${RX_RATE} KB/s, TX: ${TX_RATE} KB/s"
+done
+
+```
+
+
+
+
+
+### 用Uptrends监控网站外部访问情况
 
 https://app.uptrends.com/ValueHub
 

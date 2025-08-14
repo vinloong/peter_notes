@@ -2449,3 +2449,19 @@ json
 {
   "insecure-registries": ["registry.ngaiot.com"]
 }
+
+
+137. 网络设置
+你目前的 ip route 输出如下：
+
+default via 10.8.10.1 dev eno1 proto static metric 20100 
+10.8.10.0/24 dev eno1 proto kernel scope link src 10.8.10.230 metric 100 
+169.254.0.0/16 dev eno1 scope link metric 1000 
+这表示：
+默认网关（出网走的路径）是：10.8.10.1，通过网卡 eno1
+本地网段：10.8.10.0/24 在 eno1 上，IP 是 10.8.10.230
+169.254.0.0/16 是链路本地地址，不用管
+
+
+ip route del default
+ip route add default 
